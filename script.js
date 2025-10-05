@@ -18,8 +18,8 @@ async function loadFiles(path = "cdn") {
     });
 }
 
-function updateCaret(e) {
-    if (e?.key && e.key.length !== 1 && !allowedKeys.includes(e.key)) return;
+function updateCaret(event) {
+    if (event?.key && event.key.length !== 1 && !allowedKeys.includes(event.key)) return;
 
     // input update
     const textWhole = input.value.substring(2);
@@ -33,11 +33,25 @@ function updateCaret(e) {
     caret.style.top = rect.height + "px";
 }
 
+function handleInput(event) {
+    if (event.key === "Enter") {
+
+    }
+    else if (event.key === "Up") {
+
+    }
+    else if (event.key === "Down") {
+        
+    }
+    else
+        updateCaret(event);
+}
+
 // loadFiles();
 
-input.addEventListener("input", updateCaret);
-input.addEventListener("click", updateCaret);
-input.addEventListener("keyup", updateCaret);
+input.addEventListener("input", handleInput);
+input.addEventListener("click", handleInput);
+input.addEventListener("keyup", handleInput);
 updateCaret();
 
 input.focus();
