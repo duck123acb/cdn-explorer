@@ -4,6 +4,8 @@ const caret = document.querySelector("#caret");
 
 const allowedKeys = ["ArrowLeft", "ArrowRight"];
 let commandHistory = [];
+let historyIndex = null;
+let currentCommand = "";
 
 async function loadFiles(path = "cdn") {
     const res = await fetch(`https://api.github.com/repos/duck123acb/duck123acb.github.io/contents/${path}`);
@@ -64,18 +66,38 @@ open - Allows user to open specified file in a new tab.`
             break;
     }
 
+    historyIndex = null; 
+    currentCommand = "";
     input.value = "";
+    updateCaret();
+}
+function scrollCommands(up, command) {
+    if (commandHistory.length === 0) return;
+
+    if (historyIndex === null) {
+        currentCommand = command;
+        historyIndex = up ? commandHistory.length - 1 : null;
+    }
+    else {
+        historyIndex += up ? -1 : 1;
+        if (historyIndex < 0) historyIndex = 0;
+        if (historyIndex >= commandHistory.length) historyIndex = null;
+    }
+
+    console.log(historyIndex);
+    input.value = historyIndex === null ? "$ " + currentCommand : "$ " + commandHistory[historyIndex];
     updateCaret();
 }
 
 function handleInput(event) {
+    const command = input.value.substring(2);
     if (event.key === "Enter")
-        runCommand(input.value.substring(2));
-    else if (event.key === "Up") {
-
+        runCommand(command);
+    else if (event.key === "ArrowUp") {
+        scrollCommands(true, command);
     }
-    else if (event.key === "Down") {
-        
+    else if (event.key === "ArrowDown") {
+        scrollCommands(false, command);
     }
     else
         updateCaret(event);
