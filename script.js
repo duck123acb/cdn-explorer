@@ -21,7 +21,7 @@ async function loadFiles(path = "cdn") {
     });
 }
 
-function updateCaret(event) {
+function updateCaret(event) { // the cursor technically gets desynced in long strings but its fine
     if (event?.key && event.key.length !== 1 && !allowedKeys.includes(event.key)) return;
 
     // input update
@@ -33,7 +33,7 @@ function updateCaret(event) {
     mirror.textContent = "$ " + textBeforeCaret.replace(/ /g, "\u00a0");
     const rect = mirror.getBoundingClientRect();
     caret.style.left = rect.width + 2 + "px";
-    caret.style.top = rect.height + "px";
+    caret.style.top = rect.height + 2 + "px";
 }
 function runCommand(command) {
     commandHistory.push(command);
