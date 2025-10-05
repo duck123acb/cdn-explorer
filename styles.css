@@ -4,3 +4,50 @@ body {
     font-weight: 300;
     font-style: normal;
 }
+
+header, footer {
+    background-color: black;
+}
+
+main {
+    background-color: black;
+    color: white;
+    padding: .1rem 3rem;
+}
+
+.input-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+#mirror {
+    position: absolute;
+    top: 0;
+    left: 0;
+    white-space: pre;
+    visibility: hidden;
+}
+#caret {
+    position: absolute;
+    width: 10px;
+    height: .125em;
+    background: white;
+    animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+    50% { opacity: 0; }
+}
+#realInput {
+    font-family: "JetBrains Mono", monospace;
+    font-optical-sizing: auto;
+    font-weight: 300;
+    font-style: normal;
+
+    border: none;
+    outline: none;
+    
+    background-color: black;
+    color: white;
+    caret-color: transparent;
+    width: 100%;
+}
