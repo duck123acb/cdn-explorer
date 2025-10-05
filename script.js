@@ -3,6 +3,7 @@ const mirror = document.querySelector("#mirror");
 const caret = document.querySelector("#caret");
 
 const allowedKeys = ["ArrowLeft", "ArrowRight"];
+let commandHistory = [];
 
 async function loadFiles(path = "cdn") {
     const res = await fetch(`https://api.github.com/repos/duck123acb/duck123acb.github.io/contents/${path}`);
@@ -32,11 +33,44 @@ function updateCaret(event) {
     caret.style.left = rect.width + 2 + "px";
     caret.style.top = rect.height + "px";
 }
+function runCommand(command) {
+    commandHistory.push(command);
+    const commandName = command.split(" ")[0];
+
+    switch (commandName) {
+        case "help":
+            console.log(
+`help - Lists all commands.
+ls - Lists all files in current directory.
+cd - Allows user to change directory by specifying the directory to change to.
+open - Allows user to open specified file in a new tab.`
+            );
+            break;
+
+        case "ls":
+            
+            break;
+
+        case "cd":
+            
+            break;
+
+        case "open":
+
+            break;
+    
+        default:
+            console.log(`Command: ${commandName} not found. Run help to see available commands.`);
+            break;
+    }
+
+    input.value = "";
+    updateCaret();
+}
 
 function handleInput(event) {
-    if (event.key === "Enter") {
-
-    }
+    if (event.key === "Enter")
+        runCommand(input.value.substring(2));
     else if (event.key === "Up") {
 
     }
@@ -47,7 +81,7 @@ function handleInput(event) {
         updateCaret(event);
 }
 
-// loadFiles();
+loadFiles();
 
 input.addEventListener("input", handleInput);
 input.addEventListener("click", handleInput);
