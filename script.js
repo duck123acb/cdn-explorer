@@ -42,9 +42,28 @@ let currentCommand = "";
 let currentDir = new Directory();
 
 async function cd(dirName) {
-    // TODO: handle .. and /
-    const dir = currentDir.items.find(f => f instanceof Directory && f.name === dirName);
-    if (!dir) return console.log(`Directory ${dirName} not found.`);
+    let dir;
+
+    if (dirName === "/" || dirName === undefined)
+        dir = new Directory();
+    else if (dirName === "..") {
+        const lastSlash = currentDir.path.lastIndexOf("/");
+    
+        if (lastSlash === -1) {
+            console.log("Already at root directory.");
+            return;
+        }
+
+        const newPath = currentDir.path.substring(0, lastSlash);
+        const newName = newPath.substring(newPath.lastIndexOf("/") + 1) || newPath;
+
+        dir = new Directory(newName, newPath);
+    }
+    else {
+        dir = currentDir.items.find(f => f instanceof Directory && f.name === dirName);
+        if (!dir) return console.log(`Directory ${dirName} not found.`);
+    }
+
     await dir.load();
     currentDir = dir;
 }
