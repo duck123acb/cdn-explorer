@@ -45,10 +45,13 @@ async function cd(dirName) {
     // TODO: handle .. and /
     const dir = currentDir.items.find(f => f instanceof Directory && f.name === dirName);
     if (!dir) return console.log(`Directory ${dirName} not found.`);
-    await dir.load(); // lazy-load only when needed
+    await dir.load();
     currentDir = dir;
 }
 function ls() {
+    if (!currentDir.items || currentDir.items.length === 0)
+        console.log("Items are still loading!");
+
     console.log(currentDir.items.map(f => f.name).join("  "));
 }
 
