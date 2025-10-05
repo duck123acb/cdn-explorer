@@ -1,24 +1,77 @@
 const input = document.querySelector("#realInput");
 const mirror = document.querySelector("#mirror");
 const caret = document.querySelector("#caret");
+const path = document.querySelector("#path");
+
+class File {
+    constructor(name, url) {
+        this.name = name;
+        this.url = url;
+    }
+}
+class Directory {
+    constructor(name="cdn", path="cdn") {
+        this.name = name;
+        this.path = path;
+        this.items = null;
+    }
+
+    async load() {
+        this.items = []; // loading
+
+        const res = await fetch(`https://api.github.com/repos/duck123acb/duck123acb.github.io/contents/${this.path}`);
+        const items = await res.json();
+
+        for (const item of items) {
+            if (item.type === "dir") {
+                this.items.push(new Directory(item.name, item.path));
+            } else {
+                this.items.push(new File(item.name, `https://duck123acb.github.io/${item.path}`));
+            }
+        };
+
+        path.textContent = this.path;
+    }
+}
 
 const allowedKeys = ["ArrowLeft", "ArrowRight"];
 let commandHistory = [];
 let historyIndex = null;
 let currentCommand = "";
 
-async function loadFiles(path = "cdn") {
-    const res = await fetch(`https://api.github.com/repos/duck123acb/duck123acb.github.io/contents/${path}`);
-    const files = await res.json();
+let currentDir = new Directory();
 
-    files.forEach(file => {
-        if (file.type === "dir") {
-            loadFiles(file.path);
-        } else {
-            const url = `https://duck123acb.github.io/${file.path}`
-            console.log(url);
+async function cd(dirName) {
+    let dir;
+
+    if (dirName === "/" || dirName === undefined)
+        dir = new Directory();
+    else if (dirName === "..") {
+        const lastSlash = currentDir.path.lastIndexOf("/");
+    
+        if (lastSlash === -1) {
+            console.log("Already at root directory.");
+            return;
         }
-    });
+
+        const newPath = currentDir.path.substring(0, lastSlash);
+        const newName = newPath.substring(newPath.lastIndexOf("/") + 1) || newPath;
+
+        dir = new Directory(newName, newPath);
+    }
+    else {
+        dir = currentDir.items.find(f => f instanceof Directory && f.name === dirName);
+        if (!dir) return console.log(`Directory ${dirName} not found.`);
+    }
+
+    await dir.load();
+    currentDir = dir;
+}
+function ls() {
+    if (!currentDir.items || currentDir.items.length === 0)
+        console.log("Items are still loading!");
+
+    console.log(currentDir.items.map(f => f.name).join("  "));
 }
 
 function updateCaret(event) { // the cursor technically gets desynced in long strings but its fine
@@ -35,11 +88,12 @@ function updateCaret(event) { // the cursor technically gets desynced in long st
     caret.style.left = rect.width + 2 + "px";
     caret.style.top = rect.height + 2 + "px";
 }
+
 function runCommand(command) {
     commandHistory.push(command);
-    const commandName = command.split(" ")[0];
+    const commandName = command.split(" ");
 
-    switch (commandName) {
+    switch (commandName[0]) {
         case "help":
             console.log(
 `help - Lists all commands.
@@ -50,11 +104,11 @@ open - Allows user to open specified file in a new tab.`
             break;
 
         case "ls":
-            
+            ls();
             break;
 
         case "cd":
-            
+            cd(commandName[1]);
             break;
 
         case "open":
@@ -62,7 +116,7 @@ open - Allows user to open specified file in a new tab.`
             break;
     
         default:
-            console.log(`Command: ${commandName} not found. Run help to see available commands.`);
+            console.log(`Command: ${commandName[0]} not found. Run help to see available commands.`);
             break;
     }
 
@@ -84,11 +138,9 @@ function scrollCommands(up, command) {
         if (historyIndex >= commandHistory.length) historyIndex = null;
     }
 
-    console.log(historyIndex);
     input.value = historyIndex === null ? "$ " + currentCommand : "$ " + commandHistory[historyIndex];
     updateCaret();
 }
-
 function handleInput(event) {
     const command = input.value.substring(2);
     if (event.key === "Enter")
@@ -103,7 +155,7 @@ function handleInput(event) {
         updateCaret(event);
 }
 
-loadFiles();
+currentDir.load();
 
 input.addEventListener("input", handleInput);
 input.addEventListener("click", handleInput);
