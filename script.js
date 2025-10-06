@@ -2,6 +2,7 @@ const input = document.querySelector("#realInput");
 const mirror = document.querySelector("#mirror");
 const caret = document.querySelector("#caret");
 const path = document.querySelector("#path");
+const outputContainer = document.querySelector("#output");
 
 class File {
     constructor(name, url) {
@@ -41,6 +42,12 @@ let currentCommand = "";
 
 let currentDir = new Directory();
 
+function log(message) {
+    const element = document.createElement("p");
+    element.textContent = message;
+    outputContainer.appendChild(element);
+}
+
 async function cd(dirName) {
     let dir;
 
@@ -50,7 +57,7 @@ async function cd(dirName) {
         const lastSlash = currentDir.path.lastIndexOf("/");
     
         if (lastSlash === -1) {
-            console.log("Already at root directory.");
+            log("Already at root directory.");
             return;
         }
 
@@ -61,7 +68,7 @@ async function cd(dirName) {
     }
     else {
         dir = currentDir.items.find(f => f instanceof Directory && f.name === dirName);
-        if (!dir) return console.log(`Directory ${dirName} not found.`);
+        if (!dir) return log(`Directory ${dirName} not found.`);
     }
 
     await dir.load();
@@ -69,9 +76,9 @@ async function cd(dirName) {
 }
 function ls() {
     if (!currentDir.items || currentDir.items.length === 0)
-        console.log("Items are still loading!");
+        log("Items are still loading!");
 
-    console.log(currentDir.items.map(f => f.name).join("  "));
+    log(currentDir.items.map(f => f.name).join("  "));
 }
 
 function updateCaret(event) { // the cursor technically gets desynced in long strings but its fine
@@ -95,7 +102,7 @@ function runCommand(command) {
 
     switch (commandName[0]) {
         case "help":
-            console.log(
+            log(
 `help - Lists all commands.
 ls - Lists all files in current directory.
 cd - Allows user to change directory by specifying the directory to change to.
@@ -114,9 +121,13 @@ open - Allows user to open specified file in a new tab.`
         case "open":
 
             break;
+
+        case "clear":
+            outputContainer.replaceChildren();
+            break;
     
         default:
-            console.log(`Command: ${commandName[0]} not found. Run help to see available commands.`);
+            log(`Command: ${commandName[0]} not found. Run help to see available commands.`);
             break;
     }
 
