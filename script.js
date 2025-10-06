@@ -47,7 +47,6 @@ function log(message) {
     element.textContent = message;
     outputContainer.appendChild(element);
 }
-
 async function cd(dirName) {
     let dir;
 
@@ -86,6 +85,7 @@ function ls() {
             link.textContent = item.name;
             link.href = item.url;
             link.target = "_blank";
+            link.rel = "noopener noreferrer";
             message.appendChild(link);
         }
         else {
@@ -95,6 +95,16 @@ function ls() {
         }
     }
     outputContainer.appendChild(message);
+}
+function open(fileName) {
+    const file = currentDir.items.find(f => f instanceof StoredFile && f.name === fileName);
+    if (!file) return log(`file ${fileName} not found.`);
+
+    const a = document.createElement("a");
+    a.href = file.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.click();
 }
 
 function updateCaret(event) { // the cursor technically gets desynced in long strings but its fine
@@ -133,7 +143,7 @@ function runCommand(command) {
             break;
 
         case "open":
-
+            open(commandName[1])
             break;
 
         case "clear":
@@ -164,25 +174,29 @@ function scrollCommands(up, command) {
     }
 
     input.value = historyIndex === null ? "$ " + currentCommand : "$ " + commandHistory[historyIndex];
-    updateCaret();
+    requestAnimationFrame(() => { // triggers an input frame
+        input.focus();
+        input.selectionStart = input.selectionEnd = input.value.length;
+        updateCaret();
+    });
 }
 function handleInput(event) {
     const command = input.value.substring(2);
-    if (event.key === "Enter")
+    if (event.key === "Enter") {
+        event.preventDefault();
         runCommand(command);
+    }
     else if (event.key === "ArrowUp") {
         scrollCommands(true, command);
     }
     else if (event.key === "ArrowDown") {
         scrollCommands(false, command);
     }
-    else
-        updateCaret(event);
+ 
 }
 
 currentDir.load();
 
-input.addEventListener("input", handleInput);
-input.addEventListener("click", handleInput);
-input.addEventListener("keyup", handleInput);
+input.addEventListener("input", updateCaret);
+input.addEventListener("keydown", handleInput);
 updateCaret();
