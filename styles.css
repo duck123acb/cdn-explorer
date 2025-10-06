@@ -15,6 +15,12 @@ main {
     padding: .1rem 3rem;
 }
 
+.files {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
 .input-container {
     position: relative;
     display: inline-block;
