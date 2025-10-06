@@ -4,7 +4,7 @@ const caret = document.querySelector("#caret");
 const path = document.querySelector("#path");
 const outputContainer = document.querySelector("#output");
 
-class File {
+class StoredFile {
     constructor(name, url) {
         this.name = name;
         this.url = url;
@@ -27,7 +27,7 @@ class Directory {
             if (item.type === "dir") {
                 this.items.push(new Directory(item.name, item.path));
             } else {
-                this.items.push(new File(item.name, `https://duck123acb.github.io/${item.path}`));
+                this.items.push(new StoredFile(item.name, `https://duck123acb.github.io/${item.path}`));
             }
         };
 
@@ -78,7 +78,23 @@ function ls() {
     if (!currentDir.items || currentDir.items.length === 0)
         log("Items are still loading!");
 
-    log(currentDir.items.map(f => f.name).join("  "));
+    const message = document.createElement("p");
+    message.className = "files";
+    for (const item of currentDir.items) {
+        if (item instanceof StoredFile) {
+            const link = document.createElement("a");
+            link.textContent = item.name;
+            link.href = item.url;
+            link.target = "_blank";
+            message.appendChild(link);
+        }
+        else {
+            const directory = document.createElement("span");
+            directory.textContent = item.name + "/";
+            message.appendChild(directory);
+        }
+    }
+    outputContainer.appendChild(message);
 }
 
 function updateCaret(event) { // the cursor technically gets desynced in long strings but its fine
@@ -102,12 +118,10 @@ function runCommand(command) {
 
     switch (commandName[0]) {
         case "help":
-            log(
-`help - Lists all commands.
-ls - Lists all files in current directory.
-cd - Allows user to change directory by specifying the directory to change to.
-open - Allows user to open specified file in a new tab.`
-            );
+            log("help - Lists all commands.");
+            log("ls - Lists all files in current directory.");
+            log("cd - Allows user to change directory by specifying the directory to change to.");
+            log("open - Allows user to open specified file in a new tab.");
             break;
 
         case "ls":
