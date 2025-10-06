@@ -161,5 +161,3 @@ input.addEventListener("input", handleInput);
 input.addEventListener("click", handleInput);
 input.addEventListener("keyup", handleInput);
 updateCaret();
-
-input.focus();
